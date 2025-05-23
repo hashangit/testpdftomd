@@ -20,13 +20,15 @@ const PdfConverterPage: React.FC = () => {
     useEffect(() => {
         try {
             // IMPORTANT: Paths now reference the public folder
+            const DEFAULT_LLM_MODEL = 'Qwen3-0.6B-q4f16_1-MLC';
+
             const instance = new Extract2MDConverter({
                 pdfJsWorkerSrc: '/extract2md_assets/pdf.worker.min.mjs', // Corrected to .mjs
                 tesseractWorkerPath: '/extract2md_assets/assets/tesseract-worker.min.js',
                 tesseractCorePath: '/extract2md_assets/assets/tesseract-core.wasm.js',
                 tesseractLangPath: '/extract2md_assets/assets/lang-data/',
                 splitPascalCase: false,
-                llmModel: 'Qwen3-0.6B-q4f16_1-MLC', // Explicitly set the LLM model
+                llmModel: DEFAULT_LLM_MODEL, // Explicitly set the LLM model
                 progressCallback: (progressInfo: ProgressReport) => {
                     console.log(`[UI Progress] ${progressInfo.stage}: ${progressInfo.message}`, progressInfo.progress !== undefined ? (progressInfo.progress * 100).toFixed(1) + '%' : '');
                     setProgressMessage(`${progressInfo.message}${progressInfo.progress !== undefined ? ` (${(progressInfo.progress * 100).toFixed(0)}%)` : ''}`);
@@ -84,9 +86,9 @@ const PdfConverterPage: React.FC = () => {
             
             try {
                 console.log('About to call llmRewrite with text length:', highAccuracyText.length);
-                const finalMarkdown = await converterRef.current.llmRewrite(highAccuracyText, {
-                    llmModel: 'Qwen3-0.6B-q4f16_1-MLC',
-                    chatOpts: {
+const finalMarkdown = await converterRef.current.llmRewrite(highAccuracyText, {
+                    llmModel: DEFAULT_LLM_MODEL,
+                     chatOpts: {
                         // Options that may be passed to WebLLM's ChatModule
                         temperature: 0.7,
                         max_gen_len: 2048,
