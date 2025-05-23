@@ -11,7 +11,7 @@
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "extract2md": "file:../../Extract2MD/extract2md-1.0.6.tgz",
+    "extract2md": "file:./Extract2MD/src/index.js",
     "lucide-react": "^0.511.0",
     "next": "15.3.2",
     "react": "^19.0.0",
