@@ -405,6 +405,22 @@ class Extract2MDConverter {
     }
 
     async llmRewrite(textToRewrite, options = {}) {
+        const MAX_REWRITE_TEXT_LENGTH = 10000;
+
+        // 1. Ensure textToRewrite is a string and handle null/undefined
+        if (textToRewrite === null || typeof textToRewrite === 'undefined') {
+            textToRewrite = '';
+        }
+        textToRewrite = String(textToRewrite);
+
+        // 2. Truncate textToRewrite if it exceeds MAX_REWRITE_TEXT_LENGTH
+        const originalLength = textToRewrite.length;
+        if (originalLength > MAX_REWRITE_TEXT_LENGTH) {
+            textToRewrite = textToRewrite.substring(0, MAX_REWRITE_TEXT_LENGTH);
+            // 4. Add Warning for Truncation
+            console.warn(`Extract2MD: llmRewrite input text truncated from ${originalLength} to ${MAX_REWRITE_TEXT_LENGTH} characters.`);
+        }
+
         const model = options.llmModel || this.llmModel;
         const promptTemplate = options.llmPromptTemplate || 
             ((text) => `Please rewrite the following text, which was extracted from a PDF. Aim to improve its clarity, correct grammatical errors, and enhance its flow and professional tone, while preserving the original meaning, information, details, context and structure. Correct spelling errors in common words (do not change spelling in uncommon words like names, places, brands, etc.). Output only the rewritten text.\n\nOriginal Text:\n${text}\n\nRewritten Text:`);
