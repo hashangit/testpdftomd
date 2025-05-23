@@ -16,12 +16,11 @@ const PdfConverterPage: React.FC = () => {
     const converterRef = useRef<Extract2MDConverter | null>(null);
     const [converterInitialized, setConverterInitialized] = useState<boolean>(false);
     const [initializationError, setInitializationError] = useState<string>('');
+    const DEFAULT_LLM_MODEL = 'Qwen3-0.6B-q4f16_1-MLC';
 
     useEffect(() => {
         try {
             // IMPORTANT: Paths now reference the public folder
-            const DEFAULT_LLM_MODEL = 'Qwen3-0.6B-q4f16_1-MLC';
-
             const instance = new Extract2MDConverter({
                 pdfJsWorkerSrc: '/extract2md_assets/pdf.worker.min.mjs', // Corrected to .mjs
                 tesseractWorkerPath: '/extract2md_assets/assets/tesseract-worker.min.js',
