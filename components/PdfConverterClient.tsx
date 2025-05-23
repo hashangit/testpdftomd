@@ -26,6 +26,7 @@ const PdfConverterPage: React.FC = () => {
                 tesseractCorePath: '/extract2md_assets/assets/tesseract-core.wasm.js',
                 tesseractLangPath: '/extract2md_assets/assets/lang-data/',
                 splitPascalCase: false,
+                llmModel: 'Qwen3-0.6B-q4f16_1-MLC', // Explicitly set the LLM model
                 progressCallback: (progressInfo: ProgressReport) => {
                     console.log(`[UI Progress] ${progressInfo.stage}: ${progressInfo.message}`, progressInfo.progress !== undefined ? (progressInfo.progress * 100).toFixed(1) + '%' : '');
                     setProgressMessage(`${progressInfo.message}${progressInfo.progress !== undefined ? ` (${(progressInfo.progress * 100).toFixed(0)}%)` : ''}`);
@@ -33,6 +34,7 @@ const PdfConverterPage: React.FC = () => {
             });
             converterRef.current = instance;
             setConverterInitialized(true);
+            console.log('Extract2MDConverter initialized successfully');
         } catch (err) {
             console.error("Failed to initialize Extract2MDConverter:", err);
             const errorMsg = `Error: Could not initialize PDF converter. Ensure 'extract2md' is installed and assets are correctly placed in public/extract2md_assets/. Details: ${err instanceof Error ? err.message : String(err)}`;
@@ -80,9 +82,24 @@ const PdfConverterPage: React.FC = () => {
             
             setProgressMessage('Text extracted. Now rewriting with LLM...');
             
-            const finalMarkdown = await converterRef.current.llmRewrite(highAccuracyText);
-
-            setMarkdownOutput(finalMarkdown);
+            try {
+                console.log('About to call llmRewrite with text length:', highAccuracyText.length);
+                const finalMarkdown = await converterRef.current.llmRewrite(highAccuracyText, {
+                    llmModel: 'Qwen3-0.6B-q4f16_1-MLC',
+                    chatOpts: {
+                        // Options that may be passed to WebLLM's ChatModule
+                        temperature: 0.7,
+                        max_gen_len: 2048,
+                    }
+                });
+                console.log('llmRewrite completed successfully');
+                setMarkdownOutput(finalMarkdown);
+            } catch (llmError) {
+                console.error('LLM rewrite failed, falling back to original text:', llmError);
+                // Fallback to original text if LLM fails
+                setMarkdownOutput(highAccuracyText);
+                setProgressMessage('LLM rewrite failed, using OCR text directly.');
+            }
             setProgressMessage('Processing complete!');
             
             await converterRef.current.unloadLLM();
